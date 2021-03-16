@@ -9,10 +9,29 @@ void (function (root, factory) {
   var supported = checkSupport()
   if (supported) return
 
+  // Regist Element.closest()
+  if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector ||
+      Element.prototype.webkitMatchesSelector;
+  }
+
+  if (!Element.prototype.closest) {
+    Element.prototype.closest = function (s) {
+      var el = this;
+
+      do {
+        if (Element.prototype.matches.call(el, s)) return el;
+        el = el.parentElement || el.parentNode;
+      } while (el !== null && el.nodeType === 1);
+      return null;
+    };
+  }
+
   // Add a classname
   document.documentElement.className += ' no-details'
 
-  window.addEventListener('click', clickHandler)
+  window.addEventListener('click', handler)
+  window.addEventListener('keydown', keydownHandler)
 
   injectStyle('details-polyfill-style',
     'html.no-details ' + DETAILS + ' { display: block; }\n' +              
@@ -24,9 +43,9 @@ void (function (root, factory) {
    * Click handler for `<summary>` tags
    */
 
-  function clickHandler (e) {
-    if (e.target.nodeName.toLowerCase() === 'summary') {
-      var details = e.target.parentNode
+  function handler (e) {
+    if (e.target.closest(DETAILS) !== null) {
+      var details = e.target.closest(DETAILS)
       if (!details) return
 
       if (details.getAttribute('open')) {
@@ -36,6 +55,16 @@ void (function (root, factory) {
         details.open = true
         details.setAttribute('open', 'open')
       }
+    }
+  }
+
+  /*
+   * Keydown handler for `<summary>` tags
+   */
+
+  function keydownHandler (e) {
+    if (e.keyCode === 13) {
+      handler(e)
     }
   }
 
