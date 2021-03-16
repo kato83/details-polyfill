@@ -44,7 +44,7 @@ void (function (root, factory) {
    */
 
   function handler (e) {
-    if (e.target.closest(DETAILS) !== null) {
+    if (e.target.nodeName.toLowerCase() === 'summary' || e.target.closest(SUMMARY) !== null) {
       var details = e.target.closest(DETAILS)
       if (!details) return
 
